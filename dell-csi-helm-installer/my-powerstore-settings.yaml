@@ -1,0 +1,93 @@
+# "driverName" defines the name of driver (provisioner)
+driverName: "csi-powerstore.dellemc.com"
+
+# "powerStoreApi" defines the full path to PowerStore API
+# Example: https://127.0.0.1/api/rest
+powerStoreApi:
+
+# "volumeNamePrefix" defines a string prepended to each volume created by the CSI driver.
+volumeNamePrefix: csi
+
+# "nodeNamePrefix" defines a string prepended to each node registered by the CSI driver.
+nodeNamePrefix: csi-node
+
+# "nodeIDPath" defines the path to file with node identifier (e.g. /etc/machine-id, /etc/hostname).
+nodeIDPath: /etc/hostname
+
+# "controller" allows to configure controller specific parameters
+controller:
+  # "controller.nodeSelector" defines what nodes would be selected for pods of controller deployment
+  # Leave as blank to use all nodes
+  nodeSelector:
+  #   node-role.kubernetes.io/master: ""
+
+  # "controller.tolerations" defines tolerations that would be applied to controller deployment
+  # Leave as blank to install controller on worker nodes
+  tolerations:
+  #  - key: "node-role.kubernetes.io/master"
+  #    operator: "Exists"
+  #    effect: "NoSchedule"
+
+  # "controller.replicas" defines number of replicas of controller deployment
+  replicas: 2
+
+# "node" allows to configure node specific parameters
+node:
+  # "node.nodeSelector" defines what nodes would be selected for pods of node daemonset
+  # Leave as blank to use all nodes
+  nodeSelector:
+  #   node-role.kubernetes.io/master: ""
+
+  # "node.tolerations" defines tolerations that would be applied to node daemonset
+  # Leave as blank to install node driver only on worker nodes
+  tolerations:
+  #  - key: "node-role.kubernetes.io/master"
+  #    operator: "Exists"
+  #    effect: "NoSchedule"
+
+# "connection" allows to configure connection to storage array
+connection:
+  # "connection.scsiProtocol" allows to specify which scsi protocol to use
+  # Can be "FC", "ISCSI", "auto", "None". If "auto", will choose FC if both are available.
+  # If "None" the driver will try to use NFS
+  scsiProtocol: ISCSI
+
+  # "connection.enableCHAP" allows to enable CHAP for iSCSI connections
+  # Be sure to configure "chapuser" and "chapsecret" fields in your "powerstore-creds" secret
+  enableCHAP: false
+
+  # "connection.nfs" allows to configure nfs connection
+  nfs:
+    # "connection.enabled" enables nfs support, set this to true to enable nfs
+    enabled: false
+    # "connection.nasServerName" allows to point to NAS Serve to use from storage array
+    nasServerName: nas-server
+    # "connection.version" allows to set version of nfs protocol
+    version: v3
+
+# "nodeFCPortsFilterFile" is the name of the environment variable which store path to the file which
+# provide list of WWPN which should be used by the driver for FC connection on this node
+# example:
+# content of the file:
+#   21:00:00:29:ff:48:9f:6e,21:00:00:29:ff:48:9f:6e
+# If file not exist or empty or in invalid format, then the driver will use all available FC ports
+nodeFCPortsFilterFile: /etc/fc-ports-filter
+
+# The installation process will generate multiple storageclasses based on these parameters.
+# Only the primary storageclass for the driver will be marked default if specified.
+storageClass:
+  # "storageClass.name" defines the name of the storage class to be defined.
+  name: powerstore
+
+  # "storageClass.isDefault" defines whether the primary storage class should be the # default.
+  isDefault: "true"
+
+  # "storageClass.reclaimPolicy" defines what will happen when a volume is
+  # removed from the Kubernetes API. Valid values are "Retain" and "Delete".
+  reclaimPolicy: Delete
+
+snapshotClass:
+  # "snapshotClass.name" defines the name of the snapshot class to be defined.
+  name: powerstore-snapshot
+
+
